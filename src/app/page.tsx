@@ -18,9 +18,9 @@ export default function Home() {
   const [width, setWidth] = useState<number>(window.innerWidth);
 
   useEffect(() => {
-    setWidth(window.innerWidth);
-
     const handleResize = () => setWidth(window.innerWidth);
+
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);

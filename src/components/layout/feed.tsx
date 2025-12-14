@@ -79,6 +79,25 @@ export default function Feed({ user }: Props) {
     }
   }
 
+  const deletePostHandler = (post_id: string) => {
+    try {
+      fetch(`/api/posts/${post_id}`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+      })
+      .then((res) => {
+        if(res.status === 200) {
+          setPosts(posts.filter((post) => post.id !== post_id));
+        }
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className="flex-6 h-full w-full mt-7.5 [@media(max-width:1200px)]:pl-5 [@media(max-width:1200px)]:pr-5 [@media(max-width:1200px)]:py-0">
       <h1 className='text-3xl font-bold ml-3'>Activity Feed</h1>
@@ -96,7 +115,8 @@ export default function Feed({ user }: Props) {
               post={post}
               user={user}
               likeButtonHandler={likeButtonHandler} 
-              reportButtonHandler={reportButtonHandler}/>
+              reportButtonHandler={reportButtonHandler}
+              deletePostHandler={deletePostHandler}/>
           ))
           : null
         }

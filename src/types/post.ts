@@ -1,4 +1,6 @@
-import { User, Like, Comment } from "../../generated/prisma";
+import { Like } from "./like";
+import { User } from "./user";
+import { Comment } from "./comment";
 
 export interface Post {
   id: string;

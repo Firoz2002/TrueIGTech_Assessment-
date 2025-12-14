@@ -1,16 +1,15 @@
 "use client";
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 
 import Topbar from "@/components/layout/topbar";
 import PostCard from "@/components/cards/post-card";
 import UserCard from "@/components/cards/user-card";
 
 export default function Profile() {
-  const session = useSession();
-  const userId = session.data?.user?.id as string;
-
+  const params = useParams();
+  const userId = params.id;
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -136,7 +135,7 @@ export default function Profile() {
                   <UserCard 
                     key={f.followee.id}  
                     image={f.followee.image}
-                    username={f.followee.name}  
+                    username={f.followee.username}  
                     unfollow={() => handleUnfollow(f.followee.id)} 
                   />
                 ))
@@ -153,7 +152,7 @@ export default function Profile() {
                   <UserCard 
                     key={f.follower.id} 
                     image={f.follower.image}
-                    username={f.follower.name}
+                    username={f.follower.username}
                     unfollow={() => handleUnfollow(f.follower.id)}
                   />
                 ))

@@ -7,7 +7,7 @@ cloudinary.config({
     secure: true
 })
 
-export const upload = async (file: File, folder: string = 'profile_pics') => {
+export const upload = async (file: File, folder: string = 'default') => {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
