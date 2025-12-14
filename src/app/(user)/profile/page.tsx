@@ -34,7 +34,7 @@ export default function Profile() {
 
   const handleUnfollow = async (user_id: string) => {
     try {
-      const res = await fetch(`/api/users/${userId}/follow`, {
+      const res = await fetch(`/api/users/${user_id}/follow`, {
         method: "DELETE",
       });
 
@@ -139,6 +139,7 @@ export default function Profile() {
                     key={f.followee.id}  
                     image={f.followee.image}
                     username={f.followee.username}  
+                    unfollow={() => handleUnfollow(f.followee.id)} 
                   />
                 ))
               ) : (
@@ -155,6 +156,7 @@ export default function Profile() {
                     key={f.follower.id} 
                     image={f.follower.image}
                     username={f.follower.username}
+                    unfollow={() => handleUnfollow(f.follower.id)}
                   />
                 ))
               ) : (
