@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+
+model Account {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId                  String   @db.ObjectId
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+
+model Session {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken  String   @unique
+
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expires       DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+
+model User {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  email           String   @unique
+  name            String?
+  bio             String?
+  image           String?
+  password        String?
+  emailVerified   DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
+  accounts          Account[]
+  sessions          Session[]
+
+  likes           Like[]
+  posts           Post[]
+  comments        Comment[]
+  followers       Follow[] @relation("followers")
+  following       Follow[] @relation("following")
+}
+
+model Post {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  media     String[]
+
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  comments  Comment[]
+  likes     Like[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Comment {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+
+  userId  String   @db.ObjectId
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId  String   @db.ObjectId
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([postId])
+}
+
+model Like {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String   @db.ObjectId
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String   @db.ObjectId
+  post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId]) // one like per user per post
+  @@index([postId])
+}
+
+model Follow {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  followerId  String   @db.ObjectId
+  follower    User     @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followeeId  String   @db.ObjectId
+  followee    User     @relation("followers", fields: [followeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followeeId]) // prevent duplicate follows
+  @@index([followerId])
+  @@index([followeeId])
+}
