@@ -1,66 +1,74 @@
+"use client";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Activity, Users, UserCircle } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Activity, Users, UserCircle, LogOut } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
-  currentPage: string;
+  currentPage: "homePage" | "friendsPage" | "profilePage";
 }
 
 export default function Topbar({ currentPage }: Props) {
-  const [activePage, setActivePage] = useState("");
-
-  useEffect(() => {
-    setActivePage(currentPage);
-  }, [currentPage]);
+  const navItemClass = (page: Props["currentPage"]) =>
+    `flex items-center justify-center px-4 py-2 border-b-2 transition-colors
+     ${
+       currentPage === page
+         ? "border-primary text-primary"
+         : "border-transparent text-muted-foreground hover:text-primary"
+     }`;
 
   return (
-    <div className="top-0 w-full h-16.25 p-2.5 flex sticky items-center bg-white border-b-2 z-50">
-      <div className="flex-3 flex items-center relative">
-        <img src="assets/logo.png" alt="logo" className="h-10 w-10 ml-5" />
-        <span className="-left-5 text-[24px] ml-5 font-bold text-[#f0793d] cursor-pointer relative">
-          Global
-        </span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/assets/logo.png" alt="logo" className="h-8 w-8" />
+          <span className="text-xl font-bold text-primary">Global</span>
+        </Link>
+
+        <nav className="flex items-center gap-6">
+          <Link href="/" className={navItemClass("homePage")}>
+            <Activity className="h-5 w-5" />
+          </Link>
+
+          <Link href="/connect" className={navItemClass("friendsPage")}>
+            <Users className="h-5 w-5" />
+          </Link>
+
+          <Link href="/profile" className={navItemClass("profilePage")}>
+            <UserCircle className="h-5 w-5" />
+          </Link>
+        </nav>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <UserCircle className="h-6 w-6" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Profile</Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-
-      <div className="flex items-center justify-evenly flex-6">
-        <div
-          className={
-            activePage === "homePage"
-              ? "p-5 border-b-2 border-black"
-              : "p-5"
-          }
-        >
-          <Link href="/">
-            <Activity size={24} />
-          </Link>
-        </div>
-
-        <div
-          className={
-            activePage === "friendsPage"
-              ? "p-5 border-b-2 border-black"
-              : "p-5"
-          }
-        >
-          <Link href="/connect">
-            <Users size={24} />
-          </Link>
-        </div>
-
-        <div
-          className={
-            activePage === "profilePage"
-              ? "p-5 border-b-2 border-black"
-              : "p-5"
-          }
-        >
-          <Link href="/profile">
-            <UserCircle size={24} />
-          </Link>
-        </div>
-      </div>
-
-      <div className="flex-3"></div>
-    </div>
+    </header>
   );
 }
