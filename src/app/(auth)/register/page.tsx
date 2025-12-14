@@ -84,7 +84,7 @@ export default function RegisterPage() {
   };
 
   const handleGoogleLogin = async () => {
-    await signIn("google", { callbackUrl: "/home" });
+    await signIn("google", { callbackUrl: "/" });
   };
 
   const handleLoginRedirect = () => {
