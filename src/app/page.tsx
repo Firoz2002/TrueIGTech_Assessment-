@@ -9,13 +9,14 @@ import Topbar from "@/components/layout/topbar";
 import Sidebar from "@/components/layout/sidebar";
 import Rightbar from "@/components/layout/rightbar";
 
-import { User } from "../../generated/prisma";
+import { User } from "@/types/user";
 
 export default function Home() {
   const router = useRouter();
   const { data: session, status } = useSession();
+
   const [user, setUser] = useState<User | null>(null);
-  const [width, setWidth] = useState<number>(window.innerWidth);
+  const [width, setWidth] = useState<number>(0);
 
   useEffect(() => {
     const handleResize = () => setWidth(window.innerWidth);
@@ -27,8 +28,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      setUser(session?.user as User);
+    if (status === "authenticated" && session?.user) {
+      setUser(session.user as User);
     }
 
     if (status === "unauthenticated") {
@@ -36,11 +37,7 @@ export default function Home() {
     }
   }, [status, session, router]);
 
-  if (status === "loading") {
-    return null;
-  }
-
-  if (!user) {
+  if (status === "loading" || !user) {
     return null;
   }
 
@@ -48,9 +45,9 @@ export default function Home() {
     <>
       <Topbar currentPage="homePage" />
       <div className="flex">
-        {(width < 800) ? null : <Sidebar width={width}/>}
-        <Feed user={user}/>
-        {(width < 1200) ? null : <Rightbar/>}
+        {width >= 800 && <Sidebar width={width} />}
+        <Feed user={user} />
+        {width >= 1200 && <Rightbar />}
       </div>
     </>
   );

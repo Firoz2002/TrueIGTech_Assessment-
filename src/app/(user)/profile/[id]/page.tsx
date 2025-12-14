@@ -6,11 +6,21 @@ import { useParams } from "next/navigation";
 import Topbar from "@/components/layout/topbar";
 import PostCard from "@/components/cards/post-card";
 import UserCard from "@/components/cards/user-card";
+import { User } from "@/types/user";
+import { Follow } from "@/types/follow";
+
+interface UserProfile extends User {
+  _count: {
+    posts: number;
+    followers: number;
+    following: number;
+  };
+}
 
 export default function Profile() {
   const params = useParams();
   const userId = params.id;
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -36,13 +46,32 @@ export default function Profile() {
       });
 
       if (res.ok) {
-        setUser(prevState => ({ ...prevState, _count: { ...prevState._count, followers: prevState._count.followers - 1 }}));
+        setUser((prevState: UserProfile | null) => prevState ? { ...prevState, _count: { ...prevState._count, followers: prevState._count.followers - 1 }} : null);
       } else {
         throw new Error(`Failed to unfollow. Status code: ${res.status}`);
       }
 
     } catch (error) {
       console.error("Error while unfollowing:", error);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok && user) {
+        setUser({
+          ...user,
+          posts: user.posts?.filter((post) => post.id !== postId) || [],
+        });
+      } else {
+        throw new Error(`Failed to delete post. Status code: ${res.status}`);
+      }
+    } catch (error) {
+      console.error("Error while deleting post:", error);
     }
   };
 
@@ -109,14 +138,15 @@ export default function Profile() {
           <div className="pb-10 ps-10 xl:min-w-[630px]">
             <h1 className="mb-2 text-2xl">Recent Posts</h1>
 
-            {user.posts.length ? (
-              user.posts.map((post: any) => (
+            {user.posts?.length ? (
+              user.posts.map((post) => (
                 <PostCard
                   key={post.id}
                   post={post}
                   user={user}
-                  likeButtonHandler={() => {}}
-                  reportButtonHandler={() => {}}
+                  likeButtonHandler={(_postId: string, _isLiked: boolean) => {}}
+                  reportButtonHandler={(_postId: string) => {}}
+                  deletePostHandler={handleDeletePost}
                 />
               ))
             ) : (
@@ -130,12 +160,12 @@ export default function Profile() {
             <div className="max-h-80 w-80 overflow-y-scroll rounded-xl border-2 bg-white">
               <h1 className="p-5 text-2xl font-semibold">Following</h1>
 
-              {user.following.length ? (
-                user.following.map((f: any) => (
+              {user.following?.length ? (
+                user.following.map((f: Follow) => (
                   <UserCard 
                     key={f.followee.id}  
-                    image={f.followee.image}
-                    username={f.followee.username}  
+                    image={f.followee.image || ""}
+                    username={f.followee.name || ""}  
                     unfollow={() => handleUnfollow(f.followee.id)} 
                   />
                 ))
@@ -147,12 +177,12 @@ export default function Profile() {
             <div className="max-h-80 w-80 overflow-y-scroll rounded-xl border-2 bg-white">
               <h1 className="p-5 text-2xl font-semibold">Followers</h1>
 
-              {user.followers.length ? (
-                user.followers.map((f: any) => (
+              {user.followers?.length ? (
+                user.followers.map((f: Follow) => (
                   <UserCard 
                     key={f.follower.id} 
-                    image={f.follower.image}
-                    username={f.follower.username}
+                    image={f.follower?.image || ""}
+                    username={f.follower?.name || ""}
                     unfollow={() => handleUnfollow(f.follower.id)}
                   />
                 ))

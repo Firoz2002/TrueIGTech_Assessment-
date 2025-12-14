@@ -5,7 +5,7 @@ import Share from "./share";
 import Navbar from './navbar';
 import PostCard from '../cards/post-card';
 import { Post } from '@/types/post';
-import { User } from '../../../generated/prisma';
+import { User } from '@/types/user';
 
 interface Props {
   user: User;

@@ -1,5 +1,5 @@
 interface Props{
-  image: string,
+  image?: string,
   username: string,
   unfollow: Function
 }

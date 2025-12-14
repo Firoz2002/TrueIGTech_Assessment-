@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react'
 import Topbar from '@/components/layout/topbar';
-import { User } from '../../../../generated/prisma';
+import { User } from '@/types/user';
 
 export default function ConnectPage() {
 

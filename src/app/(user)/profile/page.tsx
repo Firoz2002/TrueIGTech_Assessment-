@@ -7,11 +7,26 @@ import Topbar from "@/components/layout/topbar";
 import PostCard from "@/components/cards/post-card";
 import UserCard from "@/components/cards/user-card";
 
+import { Post } from "@/types/post";
+import { User } from "@/types/user";
+import { Follow } from "@/types/follow";
+
+interface UserWithCounts extends User {
+  posts: Post[];
+  followers: Follow[];
+  following: Follow[];
+  _count: {
+    posts: number;
+    followers: number;
+    following: number;
+  };
+}
+
 export default function Profile() {
   const session = useSession();
   const userId = session.data?.user?.id as string;
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserWithCounts | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -37,7 +52,17 @@ export default function Profile() {
       });
 
       if (res.ok) {
-        setUser(prevState => ({ ...prevState, _count: { ...prevState._count, followers: prevState._count.followers - 1 }}));
+        setUser((prevState: UserWithCounts | null) => {
+          if (!prevState) return prevState; // handle null safely
+          return {
+            ...prevState,
+            _count: {
+              ...prevState._count,
+              followers: prevState._count.followers - 1,
+            },
+          };
+        });
+
       } else {
         throw new Error(`Failed to unfollow. Status code: ${res.status}`);
       }
@@ -46,6 +71,24 @@ export default function Profile() {
       console.error("Error while unfollowing:", error);
     }
   };
+
+  const handleDeletePost = async (post_id: string) => {
+    try {
+      const res = await fetch(`/api/posts/${post_id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete post");
+
+      setUser((prev: any) => ({
+        ...prev,
+        posts: prev.posts.filter((p: any) => p.id !== post_id),
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   if (!user) return null;
 
@@ -111,19 +154,18 @@ export default function Profile() {
             <h1 className="mb-2 text-2xl">Recent Posts</h1>
 
             {user.posts.length ? (
-              user.posts.map((post: any) => (
+              user.posts.map((post: Post) => (
                 <PostCard
                   key={post.id}
                   post={post}
                   user={user}
                   likeButtonHandler={() => {}}
                   reportButtonHandler={() => {}}
+                  deletePostHandler={handleDeletePost}
                 />
               ))
             ) : (
-              <p className="text-center text-gray-500">
-                No posts from this user
-              </p>
+              <p className="text-center text-gray-500">No posts from this user</p>
             )}
           </div>
 

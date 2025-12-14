@@ -3,12 +3,12 @@
 import Image from "next/image";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { ImageIcon, Video, FileText, X } from "lucide-react";
-import { User } from "../../../generated/prisma";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
+import { User } from "@/types/user";
 interface Props {
   createPostHandler: (post: any) => void;
   user: User;
